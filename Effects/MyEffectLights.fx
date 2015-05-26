@@ -50,6 +50,17 @@ sampler DepthsRTSampler = sampler_state
 	AddressV = clamp;
 };
 
+Texture BumpRT;
+sampler BumpRTSampler = sampler_state
+{
+	texture = < BumpRT >;
+	magfilter = Linear;
+	minfilter = POINT;
+	mipfilter = NONE;
+	AddressU = clamp;
+	AddressV = clamp;
+};
+
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
@@ -107,7 +118,7 @@ float GetDistanceToReflector(float3 position)
 
 
 float4 CalculateLighting(VertexShaderOutput input, out CalculatedValues values) : COLOR0
-{
+{ 
     float2 texCoord = GetScreenSpaceTextureCoord(input.ScreenPosition, HalfPixel);
 
 	float4 encodedDepth = tex2D(DepthsRTSampler, texCoord);
@@ -120,6 +131,10 @@ float4 CalculateLighting(VertexShaderOutput input, out CalculatedValues values) 
 	float specularPower = normal.a * SPECULAR_POWER_RATIO;
 
 	normal.xyz = GetNormalVectorFromRenderTarget(normal.xyz);
+
+	//convert the camera vector to tangent space
+
+
 	values.Normal = normal;
 
     values.Diffuse = tex2D(DiffuseRTSampler, texCoord);

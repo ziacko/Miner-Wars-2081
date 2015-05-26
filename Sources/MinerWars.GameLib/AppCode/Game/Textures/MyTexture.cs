@@ -226,8 +226,14 @@ namespace MinerWars.AppCode.Game.Textures
 
             var ddsTexture = new FileInfo(MyMinerGame.Static.RootDirectory + "\\" + this.Name + ".dds");
            // System.Diagnostics.Debug.Assert(ddsTexture.Exists);
+
+            //if the texture is a bump map and can't be found then just skip
             if (ddsTexture.Exists)
             {
+                if(ddsTexture.Name.Contains("_bm"))
+                {
+                    MyMwcLog.WriteLine("bump map has been loaded!");
+                }
                 this.texture = LoadDDSTexture(ddsTexture.FullName, quality);// : LoadXNATexture(this.Name);
             }
             else
@@ -239,6 +245,10 @@ namespace MinerWars.AppCode.Game.Textures
                 }
                 else
                 {
+                    if (ddsTexture.Name.Contains("_bm"))
+                    {
+                        return true;
+                    }
                     this.LoadState = LoadState.Error;
                     string s = "Texture " + this.Name + " is missing.";
                     System.Diagnostics.Debug.Assert(pngTexture.Exists, s);

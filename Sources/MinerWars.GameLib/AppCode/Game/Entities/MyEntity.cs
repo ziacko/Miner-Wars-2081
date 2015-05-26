@@ -2007,7 +2007,7 @@ namespace MinerWars.AppCode.Game.Entities
             t = null;
             MyModel collisionModel = ModelLod0;
 
-            if (collisionModel != null)
+            /*if (collisionModel != null)
             {
                 MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartProfilingBlock("MyEntity.GetIntersectionWithLine on model");
                 MyIntersectionResultLineTriangleEx? result = collisionModel.GetTrianglePruningStructure().GetIntersectionWithLine(this, ref line, flags);
@@ -2017,7 +2017,7 @@ namespace MinerWars.AppCode.Game.Entities
                     t = result.Value;
                     ret = true;
                 }
-            }
+            }*/
 
             //Cannot profile because of multithreading
             //MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().EndProfilingBlock();

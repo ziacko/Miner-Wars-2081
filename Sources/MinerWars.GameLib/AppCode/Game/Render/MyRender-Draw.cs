@@ -1175,7 +1175,7 @@ namespace MinerWars.AppCode.Game.Render
         internal static MyTexture2D GetDebugNormalTextureBump()
         {
             LazyLoadDebugTextures();
-            return m_debugNormalTextureBump;
+            return m_debugTextureBump;
         }
 
         /// <summary>
@@ -1197,6 +1197,9 @@ namespace MinerWars.AppCode.Game.Render
                         {
                             shader.SetTextureDiffuse(material.DiffuseTexture);
                             shader.SetTextureNormal(material.NormalTexture);
+                            shader.SetTextureBump(material.BumpTexture);
+
+                            shader.SetHasBump(material.m_hasBumpTexture);
 
                             //Do we need this? Graphicians dont use this
                             //shader.SetDiffuseColor(material.DiffuseColor);
@@ -1221,6 +1224,8 @@ namespace MinerWars.AppCode.Game.Render
                         {
                             shader.SetTextureDiffuse(null);
                             shader.SetTextureNormal(null);
+                            shader.SetTextureBump(null);
+                            shader.SetHasBump(false);
 
                             shader.SetSpecularPower(1);
                             shader.SetSpecularIntensity(1);
@@ -1325,9 +1330,9 @@ namespace MinerWars.AppCode.Game.Render
             {
                 m_debugNormalTexture = MyTextureManager.GetTexture<MyTexture2D>("Textures2\\Models\\fake_ns");
             }
-            if (m_debugNormalTextureBump == null)
+            if (m_debugTextureBump == null)
             {
-                m_debugNormalTextureBump = MyTextureManager.GetTexture<MyTexture2D>("Textures2\\Models\\Debug\\debug_n");
+                m_debugTextureBump = MyTextureManager.GetTexture<MyTexture2D>("Textures2\\Models\\fake_ns");
             }
         }
 

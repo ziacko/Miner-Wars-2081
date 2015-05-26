@@ -14,6 +14,8 @@ using MinerWars.AppCode.Game.Entities;
 using MinerWars.AppCode.Game.Models;
 using MinerWarsMath;
 using MinerWars.CommonLIB.AppCode.Networking;
+using MinerWars.AppCode.Game.GUI.Core;
+using MinerWars.AppCode.Toolkit.Input;
 
 namespace MinerWars.AppCode.Game.Render
 {
@@ -210,6 +212,49 @@ namespace MinerWars.AppCode.Game.Render
                         {
                             shader.SetTextureDiffuse(material.DiffuseTexture);
                             shader.SetTextureNormal(material.NormalTexture);
+                            if (material.m_hasBumpTexture)
+                            {
+                                shader.SetHasBump(true);
+                                shader.SetRayHeight(MyEffectModelsDNS.RayHeight);
+                                shader.SetTextureBump(material.BumpTexture);
+                                shader.SetCameraPosition(MyCamera.Position);
+                                shader.SetParallaxScale(MyEffectModelsDNS.ParallaxScale);
+                                shader.SetScaleBias(MyEffectModelsDNS.ScaleBias);
+                                if(MyGuiManager.GetInput().IsKeyPress(Keys.NumPad0) && MyEffectModelsDNS.ParallaxScale <= 1)
+                                {
+                                    MyEffectModelsDNS.ParallaxScale += 0.01f;
+                                }
+
+                                if(MyGuiManager.GetInput().IsKeyPress(Keys.NumPad1) && MyEffectModelsDNS.ParallaxScale >= 0)
+                                {
+                                    MyEffectModelsDNS.ParallaxScale -= 0.01f;
+                                } 
+                               
+                                if(MyGuiManager.GetInput().IsKeyPress(Keys.NumPad2) && MyEffectModelsDNS.RayHeight <= 1)
+                                {
+                                    MyEffectModelsDNS.RayHeight += 0.01f;
+                                }
+
+                                if(MyGuiManager.GetInput().IsKeyPress(Keys.NumPad3) && MyEffectModelsDNS.RayHeight >= 0)
+                                {
+                                    MyEffectModelsDNS.RayHeight -= 0.01f;
+                                }
+
+                                if(MyGuiManager.GetInput().IsKeyPress(Keys.NumPad7) && MyEffectModelsDNS.ScaleBias <= 1)
+                                {
+                                    MyEffectModelsDNS.ScaleBias += 0.001f;
+                                }
+
+                                if(MyGuiManager.GetInput().IsKeyPress(Keys.NumPad4) && MyEffectModelsDNS.ScaleBias >= 0)
+                                {
+                                    MyEffectModelsDNS.ScaleBias -= 0.001f;
+                                }
+                            }
+
+                           else
+                            {
+                                shader.SetHasBump(false);
+                            }
 
                             //Do we need this? Graphicians dont use this
                             //shader.SetDiffuseColor(material.DiffuseColor);
@@ -234,6 +279,7 @@ namespace MinerWars.AppCode.Game.Render
                         {
                             shader.SetTextureDiffuse(null);
                             shader.SetTextureNormal(null);
+                            shader.SetTextureBump(null);
 
                             shader.SetSpecularPower(1);
                             shader.SetSpecularIntensity(1);
@@ -274,6 +320,19 @@ namespace MinerWars.AppCode.Game.Render
                                 shader.SetTextureDiffuse(material.NormalTexture);
                                 //shader.SetTextureDiffuse(m_debugNormalTexture);
                                 shader.SetEmissivity(0);
+                            }
+                        }
+                        if(CheckBumpTextures)
+                        {
+                            if(!shader.IsTextureBumpSet())
+                            {
+                                LazyLoadDebugTextures();
+                                shader.SetTextureBump(m_debugTexture);
+                            }
+
+                            else
+                            {
+                                shader.SetTextureBump(material.BumpTexture);
                             }
                         }
 

@@ -126,10 +126,12 @@ namespace MinerWars.AppCode.Game.Effects
 
         public virtual void SetTextureNormal(Texture texture2D) { } 
         public virtual void SetTextureDiffuse(Texture texture2D) { }
+        public virtual void SetTextureBump(Texture texture2D) { }
 
         public virtual bool IsTextureNormalSet() { return true; }
         public virtual bool IsTextureDiffuseSet() { return true; }
         public virtual bool IsTextureSpecularSet() { return true; }
+        public virtual bool IsTextureBumpSet() { return true; }
 
         public virtual void SetDiffuseColor(MinerWarsMath.Vector3 diffuseColor) { }
         public virtual void SetHighlightColor(MinerWarsMath.Vector3 highlight) { }
@@ -139,6 +141,12 @@ namespace MinerWars.AppCode.Game.Effects
         public virtual void SetEmissivityUVAnim(Vector2 uvAnim) { }
         public virtual void SetDiffuseUVAnim(Vector2 uvAnim) { }
 
+        //public virtual void SetHasBump(bool HasBump) { }
+        public virtual void SetCameraPosition(MinerWarsMath.Vector3 CameraPosition) { }
+        public virtual void SetHasBump(bool HasBump) { }
+        public virtual void SetParallaxScale(float ParallaxScale) { }
+        public virtual void SetRayHeight(float RayHeight) { }
+        public virtual void SetScaleBias(float ScaleBias) { }
 
         public virtual void SetSpecularPower(float specularPower) { }
         public virtual void SetSpecularIntensity(float specularIntensity) { }

@@ -14,10 +14,16 @@ float	    Emissivity = 0;
 float	    EmissivityOffset = 0; 
 float2	    EmissivityUVAnim; 
 float2	    DiffuseUVAnim; 
-float3	    Highlight = 0; 
+float3	    Highlight = 0;
+//float3		CameraPosition;
 
 float		SpecularIntensity = 1;
 float		SpecularPower = 1;
+float		ParallaxScale;
+
+int			HasBumpMap;
+float		RayHeight;
+float		ScaleBias;
 
 //float		Channel0Intensity = 0;
 //float		Channel1Intensity = 0;
@@ -31,7 +37,7 @@ Texture TextureDiffuse;
 sampler TextureDiffuseSampler = sampler_state 
 { 
 	texture = <TextureDiffuse> ; 
-	mipfilter = LINEAR; 
+	mipfilter = NONE;
 	AddressU = WRAP; 
 	AddressV = WRAP;
 };
@@ -40,8 +46,17 @@ Texture TextureNormal;
 sampler TextureNormalSampler = sampler_state 
 { 
 	texture = <TextureNormal> ; 
-	mipfilter = LINEAR; 
+	mipfilter = NONE;
 	AddressU = WRAP; 
+	AddressV = WRAP;
+};
+
+Texture TextureBump;
+sampler BumpTextureSampler = sampler_state
+{
+	texture = < TextureBump >;
+	mipfilter = NONE;
+	AddressU = WRAP;
 	AddressV = WRAP;
 };
 
@@ -113,6 +128,8 @@ struct VertexShaderOutputLow_DNS
 	float4 ScreenPosition : TEXCOORD1;
 	float3 Normal : TEXCOORD2;
 	float3 WorldPos : TEXCOORD3;
+	float4 CameraInTangent : TEXCOORD4;
+	float4 EyePosition : TEXCOORD5;
 };
 
 struct VertexShaderOutputForward_DNS
@@ -147,7 +164,7 @@ struct VertexShaderInput_DNS
 struct VertexShaderOutput_DNS
 {
     VertexShaderOutputLow_DNS BaseOutput;
-    float3x3 TangentToWorld : TEXCOORD5;
+    float3x3 TangentToWorld : TEXCOORD6;
 };
 
 struct VertexShaderOutput_DNS_Instanced
@@ -207,7 +224,12 @@ VertexShaderOutputLow_DNS VertexShaderFunctionLow_DNS_Base(VertexShaderInputLow_
     output.Position = mul(output.Position, ProjectionMatrix);    
 	output.ScreenPosition = output.Position;
     output.TexCoordAndViewDistance.xy = input.TexCoord;
-	output.Normal =  normalize(mul(input.Normal.xyz, (float3x3)world));    
+	output.Normal =  normalize(mul(input.Normal.xyz, (float3x3)world));   
+	//output.CameraInTangent = float4(CameraPosition, 1) - output.Position;
+	output.EyePosition.xyz = CameraPosition.xyz - output.Position.xyz;
+	output.EyePosition.w = 1;
+	//output.CameraInTangent.w = 1;
+	output.CameraInTangent = float4(0, 0, 0, 0);
 
     return output;
 }
@@ -244,6 +266,19 @@ VertexShaderOutput_DNS VertexShaderFunction_DNS_Base(VertexShaderInput_DNS input
     output.TangentToWorld[0] = mul(input.Tangent, (float3x3)world);
     output.TangentToWorld[1] = mul(input.Binormal, (float3x3)world);
     output.TangentToWorld[2] = output.BaseOutput.Normal;
+
+
+	float3x3 TanToWorld;
+	TanToWorld[0] = mul(normalize(input.Tangent), (float3x3)world);
+	TanToWorld[1] = mul(normalize(input.Binormal), (float3x3)world);
+	TanToWorld[2] = mul(normalize(output.BaseOutput.Normal), (float3x3)world);
+
+	float3x3 WorldToTangent = transpose(TanToWorld);
+	
+	output.BaseOutput.CameraInTangent.xyz = mul(output.BaseOutput.EyePosition, WorldToTangent).xyz;
+	output.BaseOutput.CameraInTangent.w = 1;
+
+	//input.BaseOutput.EyePosition.xyz = mul(input.BaseOutput.EyePosition.xyz, input.TangentToWorld).xyz;
 
     return output;
 }
@@ -292,8 +327,6 @@ VertexShaderOutputForward_DNS VertexShaderFunctionLow_DNS_Forward(VertexShaderIn
 	return output;
 }
 
-
-
 float4 PixelShaderFunctionLow_DNS_Forward(VertexShaderOutputForward_DNS input) : COLOR0
 {
 //return float4(1,1,1,1);
@@ -314,20 +347,22 @@ float4 PixelShaderFunctionLow_DNS_Forward(VertexShaderOutputForward_DNS input) :
 	return color;
 }
 
-MyGbufferPixelShaderOutput CalculateOutput(VertexShaderOutputLow_DNS input, float3 normal, float specularIntensity, float3 diffuseColor, float3 si_sp_e, float3 highlight)
+MyGbufferPixelShaderOutput CalculateOutput(VertexShaderOutputLow_DNS input, float3 normal, float specularIntensity, float3 diffuseColor, float3 si_sp_e, float3 highlight, float2 BumpVec)
 {
 	//To check normals from vertices
 	//normal.xyz = normalize(input.TangentToWorld[2]);    
 	//float3 diffusec = GetNormalVectorIntoRenderTarget(normalize(input.TangentToWorld[1]));
+	float4 diffuseTexture;
+	MyGbufferPixelShaderOutput output;
 
-	float4 diffuseTexture = tex2D(TextureDiffuseSampler, input.TexCoordAndViewDistance.xy);
+	diffuseTexture = tex2D(TextureDiffuseSampler, BumpVec.xy);
 
 	float3 diffuse = diffuseTexture.xyz * diffuseColor.xyz;
 	//float fogBlend = (input.TexCoordAndViewDistance.z - FogDistanceNear) / (FogDistanceFar - FogDistanceNear);
 	//diffuse = lerp(diffuse, FogColor, saturate(fogBlend) * FogMultiplier);
 
 	//	Output into MRT
-	MyGbufferPixelShaderOutput output = GetGbufferPixelShaderOutput(normal.xyz,  diffuse + highlight, 
+	output = GetGbufferPixelShaderOutput(normal.xyz, diffuse + highlight,
 	specularIntensity * si_sp_e.x / SPECULAR_INTENSITY_RATIO, si_sp_e.y / SPECULAR_POWER_RATIO, input.TexCoordAndViewDistance.z);
 
 	//inverted emissivity, reflection by specular intensity
@@ -339,7 +374,7 @@ MyGbufferPixelShaderOutput CalculateOutput(VertexShaderOutputLow_DNS input, floa
 
 MyGbufferPixelShaderOutput PixelShaderFunctionLow_DNS_Base(VertexShaderOutputLow_DNS input, float3 diffuse, float3 si_sp_e, float3 highlight)
 {
-	return CalculateOutput(input, input.Normal, 1, diffuse, si_sp_e, highlight);
+	return CalculateOutput(input, input.Normal, 1, diffuse, si_sp_e, highlight, float3(0, 0, 0));
 }
 
 MyGbufferPixelShaderOutput PixelShaderFunctionLow_DNS(VertexShaderOutputLow_DNS input)
@@ -357,20 +392,89 @@ MyGbufferPixelShaderOutput PixelShaderFunctionLow_DNS_Instanced(VertexShaderOutp
 
 MyGbufferPixelShaderOutput PixelShaderFunction_DNS_Base(VertexShaderOutput_DNS input, float3 diffuse, float3 si_sp_e, float3 highlight)
 {
-	float4 diffuseTexture = tex2D(TextureDiffuseSampler, input.BaseOutput.TexCoordAndViewDistance.xy);
+	//float4 diffuseTexture = tex2D(TextureDiffuseSampler, input.BaseOutput.TexCoordAndViewDistance.xy);
 
 	input.TangentToWorld[0] = normalize(input.TangentToWorld[0]);
 	input.TangentToWorld[1] = normalize(input.TangentToWorld[1]);
 	input.TangentToWorld[2] = normalize(input.TangentToWorld[2]);
-    
-	float4 encodedNormal = tex2D(TextureNormalSampler, input.BaseOutput.TexCoordAndViewDistance.xy);
-    float3 normal = GetNormalVectorFromDDS(encodedNormal);
-    normal.xyz = normalize(mul(normal.xyz, input.TangentToWorld));    
 
+	//float3x3 WorldToTangent = transpose(input.TangentToWorld);
+
+	float4 encodedNormal1 = tex2D(TextureNormalSampler, input.BaseOutput.TexCoordAndViewDistance.xy);
+	float3 normal1 = GetNormalVectorFromDDS(encodedNormal1);
+	normal1.xyz = normalize(mul(normal1.xyz, input.TangentToWorld));
 	//float specularIntensity = encodedNormal.x; //swizzled x and w
-	float specularIntensity = encodedNormal.w; //non-swizzled x and w
-	
-	return CalculateOutput(input.BaseOutput, normal, specularIntensity, diffuse, si_sp_e, highlight);
+	//float specularIntensity1 = encodedNormal1.w; //non-swizzled x and w
+		
+	if (HasBumpMap &&  input.BaseOutput.TexCoordAndViewDistance.z < 100)
+	{
+		float ParallaxLimit = -length(input.BaseOutput.EyePosition.xy) / input.BaseOutput.EyePosition.z;
+		//ParallaxLimit = ParallaxLimit * 0.08;
+		ParallaxLimit *= ParallaxScale - ScaleBias;
+
+		float2 OffsetDirection = normalize(input.BaseOutput.EyePosition.xy);
+		float2 MaxOffset = OffsetDirection * ParallaxLimit;
+
+		int NumSamples = (int)lerp(1000, 1, dot(input.BaseOutput.EyePosition.xyz, normal1.xyz));
+
+		float StepSize = 1.0 / (float)NumSamples;
+
+		float2 DX = ddx(input.BaseOutput.TexCoordAndViewDistance.xy);
+		float2 DY = ddy(input.BaseOutput.TexCoordAndViewDistance.xy);
+
+		float CurrentRayHeight = RayHeight;
+		float2 CurrentOffset = float2(0, 0);
+		float2 LastOffset = float2(0, 0);
+
+		float LastSampledHeight = 1;
+		float CurrentSampledHeight = 1;
+
+		int CurrentSample = 0;
+
+		while (CurrentSample < NumSamples)
+		{
+			CurrentSampledHeight = tex2Dgrad(BumpTextureSampler, input.BaseOutput.TexCoordAndViewDistance.xy + CurrentOffset, DX, DY);
+			//CurrentSampledHeight = tex2D(BumpTextureSampler, input.BaseOutput.TexCoordAndViewDistance.xy + CurrentOffset).g;
+			if (CurrentSampledHeight > CurrentRayHeight)
+			{
+				float Delta1 = CurrentSampledHeight - CurrentRayHeight;
+				float Delta2 = (CurrentRayHeight + StepSize) - LastSampledHeight;
+
+				float Ratio = Delta1 / (Delta1 + Delta2);
+				CurrentOffset = (Ratio) * LastOffset + (1.0 - Ratio) * CurrentOffset;
+				CurrentSample = NumSamples + 1;
+			}
+
+			else
+			{
+				CurrentSample++;
+				CurrentRayHeight -= StepSize;
+
+				LastOffset = CurrentOffset;
+				CurrentOffset += StepSize * MaxOffset;
+				LastSampledHeight = CurrentSampledHeight;
+			}
+		}
+
+		float2 FinalCoords = input.BaseOutput.TexCoordAndViewDistance.xy + CurrentOffset;
+
+		float4 encodedNormal2 = tex2D(TextureNormalSampler, FinalCoords);
+		float3 normal2 = GetNormalVectorFromDDS(encodedNormal2);
+		normal2.xyz = normalize(mul(normal2.xyz, input.TangentToWorld));
+		//float specularIntensity = encodedNormal.x; //swizzled x and w
+		float specularIntensity2 = encodedNormal2.w; //non-swizzled x and w
+		
+		return CalculateOutput(input.BaseOutput, normal2, specularIntensity2, diffuse, si_sp_e, highlight, FinalCoords);
+	}
+
+	else
+	{
+		float4 encodedNormal = tex2D(TextureNormalSampler, input.BaseOutput.TexCoordAndViewDistance.xy);
+		float3 normal = GetNormalVectorFromDDS(encodedNormal);
+		normal.xyz = normalize(mul(normal.xyz, input.TangentToWorld));
+		float specularIntensity = encodedNormal.w;
+		return CalculateOutput(input.BaseOutput, normal, specularIntensity, diffuse, si_sp_e, highlight, input.BaseOutput.TexCoordAndViewDistance.xy);
+	}
 }
 
 MyGbufferPixelShaderOutput PixelShaderFunction_DNS(VertexShaderOutput_DNS input)

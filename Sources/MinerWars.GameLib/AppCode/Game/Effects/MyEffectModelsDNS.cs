@@ -53,6 +53,7 @@ namespace MinerWars.AppCode.Game.Effects
         readonly EffectHandle m_projectionMatrix;
         readonly EffectHandle m_textureDiffuse;
         readonly EffectHandle m_textureNormal;
+        readonly EffectHandle m_textureBump;
         readonly EffectHandle m_emissivity;
         readonly EffectHandle m_emissivityOffset;
         readonly EffectHandle m_emissivityUVAnim;
@@ -67,6 +68,9 @@ namespace MinerWars.AppCode.Game.Effects
         readonly EffectHandle m_halfPixel;
         readonly EffectHandle m_scale;
 
+        readonly EffectHandle m_hasBumpMap;
+        readonly EffectHandle m_parallaxScale;
+
         //readonly EffectHandle m_maskTexture;
         //readonly EffectHandle[] m_channelTexture;
         //readonly EffectHandle[] m_channelIntensities;
@@ -77,6 +81,7 @@ namespace MinerWars.AppCode.Game.Effects
         bool m_diffuseTextureSet = false;
         bool m_normalTextureSet = false;
         bool m_specularTextureSet = false;
+        bool m_bumpTextureSet = false;
 
         //Techniques 
         EffectHandle m_lowTechnique;
@@ -114,6 +119,9 @@ namespace MinerWars.AppCode.Game.Effects
         EffectHandle m_forwardTechnique;
         EffectHandle m_lowBlendedForwardTechnique;
 
+        EffectHandle m_rayHeight;
+        EffectHandle m_scaleBias;
+
 
         float m_emissivityLocal;
         float m_emissivityOffsetLocal;
@@ -127,6 +135,10 @@ namespace MinerWars.AppCode.Game.Effects
         int m_screenSizeYLocal;
         Vector2 m_scaleLocal;
 
+        static public float ParallaxScale;
+        static public float RayHeight;
+        static public float ScaleBias;
+
 
         public MyEffectModelsDNS()
             : base("Effects2\\Models\\MyEffectModelsDNS")
@@ -137,6 +149,7 @@ namespace MinerWars.AppCode.Game.Effects
 
             m_textureDiffuse = m_D3DEffect.GetParameter(null, "TextureDiffuse");
             m_textureNormal = m_D3DEffect.GetParameter(null, "TextureNormal");
+            m_textureBump = m_D3DEffect.GetParameter(null, "TextureBump");
             m_diffuseColor = m_D3DEffect.GetParameter(null, "DiffuseColor");
             m_emissivity = m_D3DEffect.GetParameter(null, "Emissivity");
             m_emissivityOffset = m_D3DEffect.GetParameter(null, "EmissivityOffset");
@@ -150,6 +163,11 @@ namespace MinerWars.AppCode.Game.Effects
             m_depthTextureFar = m_D3DEffect.GetParameter(null, "DepthTextureFar");
             m_halfPixel = m_D3DEffect.GetParameter(null, "HalfPixel");
             m_scale = m_D3DEffect.GetParameter(null, "Scale");
+
+            m_hasBumpMap = m_D3DEffect.GetParameter(null, "HasBumpMap");
+            m_rayHeight = m_D3DEffect.GetParameter(null, "RayHeight");
+            m_parallaxScale = m_D3DEffect.GetParameter(null, "ParallaxScale");
+            m_scaleBias = m_D3DEffect.GetParameter(null, "ScaleBias");
 
             m_lowTechnique = m_D3DEffect.GetTechnique("Technique_RenderQualityLow");
             //m_lowInstancedTechnique = m_xnaEffect.GetTechnique("Technique_RenderQualityLowInstanced");
@@ -217,6 +235,22 @@ namespace MinerWars.AppCode.Game.Effects
             m_normalTextureSet = texture2D != null;
         }
 
+        public override void SetTextureBump(Texture texture2D)
+        {
+            m_D3DEffect.SetTexture(m_textureBump, texture2D);
+            m_bumpTextureSet = texture2D != null;
+        }
+
+        public override void SetHasBump(bool HasBump)
+        {
+            m_D3DEffect.SetValue(m_hasBumpMap, HasBump);
+        }
+
+        public override void SetParallaxScale(float ParallaxScale)
+        {
+            m_D3DEffect.SetValue(m_parallaxScale, ParallaxScale);
+        }
+
         public override bool IsTextureDiffuseSet()
         {
             return m_diffuseTextureSet;
@@ -230,6 +264,11 @@ namespace MinerWars.AppCode.Game.Effects
         public override bool IsTextureNormalSet()
         {
             return m_normalTextureSet;
+        }
+
+        public override bool IsTextureBumpSet()
+        {
+            return m_bumpTextureSet;
         }
 
         public override void SetDiffuseColor(Vector3 diffuseColor)
@@ -326,6 +365,15 @@ namespace MinerWars.AppCode.Game.Effects
             }
         }
 
+        public override void SetRayHeight(float RayHeight)
+        {
+            m_D3DEffect.SetValue(m_rayHeight, RayHeight);
+        }
+
+        public override void SetScaleBias(float ScaleBias)
+        {
+            m_D3DEffect.SetValue(m_scaleBias, ScaleBias);
+        }
 
         public void SetTechnique(MyEffectModelsDNSTechniqueEnum technique)
         {

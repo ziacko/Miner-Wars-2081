@@ -217,7 +217,7 @@ namespace MinerWars.AppCode.Game.Effects
             }
         }
 
-        public void SetCameraPosition(Vector3 cameraPosition)
+        public override void SetCameraPosition(Vector3 cameraPosition)
         {
             m_D3DEffect.SetValue(m_cameraPosition, cameraPosition);
         }

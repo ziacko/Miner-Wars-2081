@@ -534,6 +534,7 @@ namespace MinerWars.AppCode.Game.Render
 
         public static bool CheckDiffuseTextures = true;
         public static bool CheckNormalTextures = false;
+        public static bool CheckBumpTextures = true;
 
         public static bool ShowSpecularIntensity = false;
         public static bool ShowSpecularPower = false;
@@ -642,7 +643,7 @@ namespace MinerWars.AppCode.Game.Render
         //Texture for debug rendering
         static MyTexture2D m_debugTexture;
         static MyTexture2D m_debugNormalTexture;
-        static MyTexture2D m_debugNormalTextureBump;
+        static MyTexture2D m_debugTextureBump;
         //static RenderTarget2D m_screenshot;
 
         // Struct for getting statistics of render object

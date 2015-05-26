@@ -42,6 +42,7 @@ struct MyGbufferPixelShaderOutput
     float4 NormalAndSpecPower : COLOR0;
     float4 DiffuseAndSpecIntensity : COLOR1;
     float4 DepthAndEmissivity : COLOR2;	
+	//float4 Bump : COLOR3;
 };
 
 //	Gets the screen-space texel coordinate from clip-space position (or just from 4D position)

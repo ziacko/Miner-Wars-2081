@@ -7455,6 +7455,7 @@ namespace MinerWars.AppCode.Game.Audio
         {
             MyMwcLog.WriteLine("Validate cues - START", LoggingOptions.AUDIO);
 
+/*
             for (int i = 0; i < Enum.GetValues(typeof(MySoundCuesEnum)).Length; i++)
             {
                 Cue cue = m_cueInfos[i].Prepare();
@@ -7473,7 +7474,7 @@ namespace MinerWars.AppCode.Game.Audio
 
                     cue.Destroy();
                 }
-            }
+            }*/
 
             MyMwcLog.WriteLine("Validate cues - END", LoggingOptions.AUDIO);
         }

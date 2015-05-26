@@ -290,8 +290,8 @@ namespace ParallelTasks
             WaitOrExecute(id);
 
             Exception[] e;
-            if (exceptions.TryGet(id, out e))
-                throw new TaskException(e);
+            if (exceptions.TryGet(id, out e)) { }
+                //throw new TaskException(e);
         }
 
         private void WaitOrExecute(int id)

@@ -11,9 +11,9 @@ namespace MinerWars.AppCode.Game.Audio
         public SoundBank SoundBank;
         public short CueIndex;
 
-        public Cue Prepare()
+        /*public Cue Prepare()
         {
             return SoundBank.Prepare(CueIndex);
-        }
+        }*/
     }
 }

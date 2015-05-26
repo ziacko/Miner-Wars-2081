@@ -926,6 +926,10 @@ namespace MinerWars.CommonLIB.AppCode.Import
             tagName = reader.ReadString();
             GImpactQuantizedBvh bvh = new GImpactQuantizedBvh();
             bvh.Load(this.ReadArrayOfBytes(reader));
+            if(bvh.Size == 0)
+            {
+                bvh.ToString();
+            }
             m_retTagData.Add(tagName, bvh);
 
 

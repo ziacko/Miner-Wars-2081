@@ -449,6 +449,11 @@ namespace MinerWars.AppCode.Game.Models
                 m_bvh = new MyQuantizedBvhAdapter(tagData[MyImporterConstants.TAG_MODEL_BVH] as GImpactQuantizedBvh, this);
             }
 
+            else
+            {
+                MyMwcLog.WriteLine("cannot find bvh!");
+            }
+
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().EndProfilingBlock();
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartProfilingBlock("Model - load data - other data");
@@ -1056,7 +1061,7 @@ namespace MinerWars.AppCode.Game.Models
 
         public IMyTriangePruningStructure GetTrianglePruningStructure()
         {
-            Debug.Assert(m_bvh != null, "BVH should be loaded from content processor");
+            //Debug.Assert(m_bvh != null, "BVH should be loaded from content processor");
             return m_bvh;
         }
 

@@ -325,10 +325,10 @@ namespace MinerWars.AppCode.Game.Audio
         {
             foreach (var bank in m_waveBanks)
             {
-                while (!bank.IsPrepared())
+               /* while (!bank.IsPrepared())
                 {
-                    m_audioEngine.DoWork();
-                }
+                  //  m_audioEngine.DoWork();
+                }*/
             }
         }
 
@@ -636,7 +636,7 @@ namespace MinerWars.AppCode.Game.Audio
             }
             else
             {
-                result = PlayCueNow2D(cueEnum, volume);
+                result = null;// PlayCueNow2D(cueEnum, volume);
             }
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().EndProfilingBlock();
@@ -644,7 +644,7 @@ namespace MinerWars.AppCode.Game.Audio
             return result;
         }
 
-        public static MySoundCue PlayCueNow2D(MySoundCuesEnum cueEnum, float volume)
+       /* public static MySoundCue PlayCueNow2D(MySoundCuesEnum cueEnum, float volume)
         {
             var cue = GetCue(cueEnum);
             cue.SetVariable(MyCueVariableEnum.Volume, volume);
@@ -653,7 +653,7 @@ namespace MinerWars.AppCode.Game.Audio
             m_soundInstancesTotal2D++;
 
             return m_cuePool.CreateCue(cue, cueEnum, false);
-        }
+        }*/
 
         public static AudioCategory GetDefaultCategory()
         {
@@ -708,38 +708,38 @@ namespace MinerWars.AppCode.Game.Audio
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartProfilingBlock("GetCueByIndex");
 
-            Cue cue = GetCue(cueEnum);
+            //Cue cue = GetCue(cueEnum);
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartNextBlock("SetVariableNoGarbage");
 
             //  Set volume. From XNA 3.1 (XACT 3.0) this seems to be mandatory, so at least set it to 1.0 (default volume)
-            cue.SetVariable(MyCueVariableEnum.Volume, volume);
+            //cue.SetVariable(MyCueVariableEnum.Volume, volume);
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartNextBlock("UpdateCuePosition");
 
             if (UseOcclusion(cueEnum))
             {
-                cue.SetVariable(MyCueVariableEnum.Occluder, CalculateOcclusion(ref position));
+               // cue.SetVariable(MyCueVariableEnum.Occluder, CalculateOcclusion(ref position));
             }
 
             m_helperEmitter.UpdateValues(ref position, ref forward, ref up, ref velocity);
-            cue.Apply3D(m_listener, m_helperEmitter);
+           // cue.Apply3D(m_listener, m_helperEmitter);
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartNextBlock("Play");
             //  Play the cue
-            cue.Play();
+            //cue.Play();
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartNextBlock("MySoundCue");
-            MySoundCue soundCue = m_cuePool.CreateCue(cue, cueEnum, true);
+           // MySoundCue soundCue = m_cuePool.CreateCue(cue, cueEnum, true);
 
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().EndProfilingBlock();
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().EndProfilingBlock();
 
             if (doLimitMaxCuesAndIsNotLoopable)
-                m_nonLoopableCuesLimit[cueIndex].Add(new WeakReference(cue));
+              //  m_nonLoopableCuesLimit[cueIndex].Add(new WeakReference(cue));
 
             m_soundInstancesTotal3D++;
-            return soundCue;
+            return null;// soundCue;
         }
 
         private static void CheckCue(MySoundCue cue)
@@ -859,14 +859,14 @@ namespace MinerWars.AppCode.Game.Audio
 
         //  Retrieve cue from corresponding soundbank based on its index(first get name based on index, then get soundbank from name)
         // Cues are not necessary to be destroyed, it gets destroyed in AudioEngine.DoWork as soon as they finish playing, call Destroy to free looping cues or not started cues.
-        static Cue GetCue(MySoundCuesEnum cueEnum)
+       /* static Cue GetCue(MySoundCuesEnum cueEnum)
         {
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartProfilingBlock("Cue.Prepare");
             Cue cue = m_cueInfos[(int)cueEnum].Prepare();
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().EndProfilingBlock();
 
             return cue;
-        }
+        }*/
 
         private static SoundBank GetSoundBank(string cueName)
         {

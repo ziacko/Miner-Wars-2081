@@ -86,7 +86,7 @@ namespace MinerWars.AppCode.Game.Models
         {
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().StartProfilingBlock("MyModels.LoadData");
             MyMwcLog.WriteLine(string.Format("MyModels.LoadData - START"));
-
+            //I guess you guys moved the actual function? lol
             MyMwcLog.WriteLine(string.Format("MyModels.LoadData - END"));
             MinerWars.AppCode.Game.Render.MyRender.GetRenderProfiler().EndProfilingBlock();
         }

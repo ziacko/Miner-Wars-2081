@@ -20,10 +20,12 @@ namespace MinerWars.AppCode.Game.Models
     internal class MyMeshMaterial
     {
         private const string C_FAKE_NORMAL_TEXTURE = "Textures2\\Models\\fake_n";
+       // private const string C_FAKE_BUMP_TEXTURE = "Texture2\\Models\\fake_n";
 
         public int HashCode;
         private MyTexture2D m_diffuseTex;
         private MyTexture2D m_normalTex;
+        private MyTexture2D m_bumpTex;
 
         private float m_specularIntensity = 1f;
         private float m_specularPower = 1f;
@@ -33,7 +35,9 @@ namespace MinerWars.AppCode.Game.Models
         private readonly string m_materialName;
         private readonly string m_diffuseName;
         private readonly string m_normalName;
+        private readonly string m_bumpName;
         private readonly bool m_hasNormalTexture;
+        public bool m_hasBumpTexture;
         private MyMeshDrawTechnique m_drawTechnique;
         private Vector2 m_emissiveUVAnim;
         private bool m_emissivityEnabled = true;
@@ -133,6 +137,12 @@ namespace MinerWars.AppCode.Game.Models
             get { return m_normalTex; }
             set { m_normalTex = value; ComputeHashCode(); }
         }
+
+        public MyTexture2D BumpTexture
+        {
+            get { return m_bumpTex; }
+            set { m_bumpTex = value; ComputeHashCode(); }
+        }
         public float SpecularIntensity
         {
             get { return m_specularIntensity; }
@@ -165,6 +175,7 @@ namespace MinerWars.AppCode.Game.Models
             {
                 m_diffuseName = name + MyMesh.C_POSTFIX_DIFFUSE_EMISSIVE;
                 m_normalName = name + MyMesh.C_POSTFIX_NORMAL_SPECULAR;
+                m_bumpName = name + MyMesh.C_POSTFIX_BUMP;
             }
             m_materialName = materialName;
             m_drawTechnique = MyMeshDrawTechnique.MESH;
@@ -181,7 +192,7 @@ namespace MinerWars.AppCode.Game.Models
         /// </summary>
         /// <param name="specularLevel"></param>
         /// <param name="glossiness"></param>
-        public MyMeshMaterial(string materialName, string diffuseName, string normalName, float glossiness, bool hasNormalTexture, ref Vector3 diffuseColor, ref Vector3 specularColor)
+        public MyMeshMaterial(string materialName, string diffuseName, string normalName, string bumpName, float glossiness, bool hasNormalTexture, bool HasBumpTexture, ref Vector3 diffuseColor, ref Vector3 specularColor)
         {
             if (diffuseColor == Vector3.Zero)
             {
@@ -192,10 +203,12 @@ namespace MinerWars.AppCode.Game.Models
             m_materialName = materialName;
             m_diffuseName = diffuseName;
             m_normalName = normalName;
+            m_bumpName = bumpName;
             m_specularIntensity = specularColor.X; //because of strange 3DSMAX/FBX conversion, specular level from 3ds max converts to .X component of specular color
             m_specularPower = glossiness;
             m_diffuseColor = diffuseColor;
             m_hasNormalTexture = hasNormalTexture;
+            m_hasBumpTexture = HasBumpTexture;
 
             //we are not using specular color directly, we just use it to store extra data (animation of holos)
             m_specularColor = specularColor;
@@ -217,6 +230,18 @@ namespace MinerWars.AppCode.Game.Models
 
                 if (MyRenderConstants.RenderQualityProfile.UseNormals)
                     NormalTexture = MyTextureManager.GetTexture<MyTexture2D>(m_normalName, CheckTexture, loadingMode);
+                   
+                BumpTexture = MyTextureManager.GetTexture<MyTexture2D>(m_bumpName, CheckTexture, loadingMode);
+                   
+               // m_hasBumpTexture = BumpTexture.IsValid;
+                if(BumpTexture.IsValid)
+                {
+                    m_hasBumpTexture = true;
+                }
+                else
+                {
+                    m_hasBumpTexture = false;
+                }                
             }
             else
             {
@@ -224,6 +249,10 @@ namespace MinerWars.AppCode.Game.Models
 
                 if (MyRenderConstants.RenderQualityProfile.UseNormals)
                     NormalTexture = MyTextureManager.GetTexture<MyTexture2D>(C_FAKE_NORMAL_TEXTURE, CheckTexture, loadingMode);
+
+                    BumpTexture = MyTextureManager.GetTexture<MyTexture2D>(m_bumpName, CheckTexture, loadingMode);
+
+                    m_hasBumpTexture = BumpTexture.IsValid;           
             }
 
             m_loadedContent = true;
@@ -259,6 +288,12 @@ namespace MinerWars.AppCode.Game.Models
             {
                 result = (result * 397) ^ m_normalTex.GetHashCode();
                 modCode += (1 << 2);
+            }
+
+            if(m_bumpTex != null)
+            {
+                result = m_bumpTex.GetHashCode();
+                modCode += (1 << 10);
             }
 
             if (m_specularIntensity != 0)

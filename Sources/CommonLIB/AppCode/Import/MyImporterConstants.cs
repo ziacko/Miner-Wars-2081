@@ -29,5 +29,6 @@ namespace MinerWars.CommonLIB.AppCode.Import
         public const string TAG_MESH_PARTS = "MeshParts";
         public const string TAG_MODEL_BVH = "ModelBvh";
         public const string TAG_MODEL_INFO = "ModelInfo";
+        public const string TAG_MODEL_BUMP = "BumpMap";
     }
 }

@@ -101,10 +101,10 @@ namespace MinerWars.AppCode.Game.Audio
                 if (m_hudTimeFromLastCuePlayed >= m_hudCueDelay || m_activeCue == null)
                 {
                     MyHudCue nextHudCue = m_hudCuesQueue.Dequeue();
-                    var cue = MyAudio.PlayCueNow2D(nextHudCue.CueEnum, nextHudCue.Volume);
+                   /* var cue = MyAudio.PlayCueNow2D(nextHudCue.CueEnum, nextHudCue.Volume);
 
                     m_activeCue = new MyActiveCueInfo() { Cue = cue, CueEnum = nextHudCue.CueEnum };
-                    m_hudTimeFromLastCuePlayed = 0;
+                    m_hudTimeFromLastCuePlayed = 0;*/
                 }
             }
             else
